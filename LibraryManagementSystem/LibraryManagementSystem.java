@@ -5,7 +5,7 @@ public class LibraryManagementSystem {
 
     private static final String DB_URL = "jdbc:mysql://localhost:3306/library";
     private static final String DB_USERNAME = "root";
-    private static final String DB_PASSWORD = "Taseen1234";
+    private static final String DB_PASSWORD = "password";
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
