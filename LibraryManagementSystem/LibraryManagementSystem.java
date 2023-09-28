@@ -1,11 +1,11 @@
 import java.sql.*;
 import java.util.Scanner;
 
-public class LibrarySystem {
+public class LibraryManagementSystem {
 
     private static final String DB_URL = "jdbc:mysql://localhost:3306/library";
     private static final String DB_USERNAME = "root";
-    private static final String DB_PASSWORD = "password";
+    private static final String DB_PASSWORD = "Taseen1234";
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -59,11 +59,98 @@ public class LibrarySystem {
                             System.out.println("Invalid choice");
                     }
                 } else if (isStudent) {
-                    // Rest of the code remains unchanged
-                    // ...
+                    System.out.println("Student Menu:");
+                    System.out.println("1. Borrow a book");
+                    System.out.println("2. Return a book");
+                    System.out.println("3. View available books");
+                    System.out.println("4. Logout");
+                    choice = getIntegerInput("Enter your choice: ");
+                    clearScreen();
+                    switch (choice) {
+                        case 1:
+                            System.out.print("Enter book ID: ");
+                            int bookId = getIntegerInput("");
+                            ResultSet bookResultSet = statement
+                                    .executeQuery("SELECT * FROM Books WHERE id = " + bookId);
+                            if (bookResultSet.next() && bookResultSet.getBoolean("is_available")) {
+                                statement.executeUpdate("UPDATE Books SET is_available = false WHERE id = " + bookId);
+                                statement.executeUpdate(
+                                        "UPDATE Students SET books_issued = books_issued + 1 WHERE id = " + studentId);
+                                System.out.println("Book borrowed successfully");
+                            } else {
+                                System.out.println("Book not available");
+                            }
+                            break;
+                        case 2:
+                            ResultSet issuedBooksResultSet = statement
+                                    .executeQuery("SELECT * FROM Students WHERE id = " + studentId);
+                            if (issuedBooksResultSet.next() && issuedBooksResultSet.getInt("books_issued") > 0) {
+                                System.out.print("Enter book ID: ");
+                                int returnBookId = getIntegerInput("");
+                                ResultSet returnBookResultSet = statement
+                                        .executeQuery("SELECT * FROM Books WHERE id = " + returnBookId);
+                                if (returnBookResultSet.next() && !returnBookResultSet.getBoolean("is_available")) {
+                                    statement.executeUpdate(
+                                            "UPDATE Books SET is_available = true WHERE id = " + returnBookId);
+                                    statement.executeUpdate(
+                                            "UPDATE Students SET books_issued = books_issued - 1 WHERE id = "
+                                                    + studentId);
+                                    System.out.println("Book returned successfully");
+                                } else {
+                                    System.out.println("Invalid book ID");
+                                }
+                            } else {
+                                System.out.println("No books issued");
+                            }
+                            break;
+                        case 3:
+                            // View available books for students
+                            viewAvailableBooks(statement);
+                            break;
+                        case 4:
+                            isStudent = false;
+                            System.out.println("Logged out successfully");
+                            break;
+                        default:
+                            System.out.println("Invalid choice");
+                    }
                 } else if (isAdmin) {
-                    // Rest of the code remains unchanged
-                    // ...
+                    System.out.println("Admin Menu:");
+                    System.out.println("1. Add a book");
+                    System.out.println("2. Remove a book");
+                    System.out.println("3. View available books");
+                    System.out.println("4. Logout");
+                    choice = getIntegerInput("Enter your choice: ");
+                    clearScreen();
+                    switch (choice) {
+                        case 1:
+                            System.out.print("Enter book ID: ");
+                            int addBookId = getIntegerInput("");
+                            System.out.print("Enter book title: ");
+                            String addBookTitle = scanner.nextLine();
+                            System.out.print("Enter book author: ");
+                            String addBookAuthor = scanner.nextLine();
+                            statement.executeUpdate("INSERT INTO Books (id, title, author, is_available) VALUES ("
+                                    + addBookId + ", '" + addBookTitle + "', '" + addBookAuthor + "', true)");
+                            System.out.println("Book added successfully");
+                            break;
+                        case 2:
+                            System.out.print("Enter book ID: ");
+                            int removeBookId = getIntegerInput("");
+                            statement.executeUpdate("DELETE FROM Books WHERE id = " + removeBookId);
+                            System.out.println("Book removed successfully");
+                            break;
+                        case 3:
+                            // View available books for admins
+                            viewAvailableBooks(statement);
+                            break;
+                        case 4:
+                            isAdmin = false;
+                            System.out.println("Logged out successfully");
+                            break;
+                        default:
+                            System.out.println("Invalid choice");
+                    }
                 }
             }
         } catch (SQLException e) {
